@@ -1,0 +1,4 @@
+# Coriolanus
+
+A Shakespeare reader for the terminal.
+Enjoy the complete works of the Bard!
