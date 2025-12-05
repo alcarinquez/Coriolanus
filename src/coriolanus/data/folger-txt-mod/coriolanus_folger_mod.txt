@@ -98,8 +98,7 @@ MENENIUS
 What work 's, my countrymen, in hand? Where go you
 With bats and clubs? The matter? Speak, I pray you.
 
-SECOND CITIZEN  Our business is not unknown to th'
-Senate. They have had inkling this fortnight what we intend to do, which now we'll show 'em in deeds. They say poor suitors have strong breaths; they shall know we have strong arms too.
+SECOND CITIZEN  Our business is not unknown to th' Senate. They have had inkling this fortnight what we intend to do, which now we'll show 'em in deeds. They say poor suitors have strong breaths; they shall know we have strong arms too.
 
 MENENIUS
 Why, masters, my good friends, mine honest neighbors,
@@ -292,8 +291,7 @@ For though abundantly they lack discretion,
 Yet are they passing cowardly. But I beseech you,
 What says the other troop?
 
-MARTIUS  They are dissolved. Hang
-'em!
+MARTIUS  They are dissolved. Hang 'em!
 They said they were an-hungry, sighed forth proverbs
 That hunger broke stone walls, that dogs must eat,
 That meat was made for mouths, that the gods sent not
@@ -517,8 +515,7 @@ Scene 3
 =======
 [Enter Volumnia and Virgilia, mother and wife to Martius. They set them down on two low stools and sew.]
 
-VOLUMNIA  I pray you, daughter, sing, or express yourself in a more comfortable sort. If my son were my husband, I should freelier rejoice in that absence wherein he won honor than in the embracements of his bed where he would show most love. When yet he was but tender-bodied and the only son of my womb, when youth with comeliness plucked all gaze his way, when for a day of kings' entreaties a mother should not sell him an hour from her beholding,
-I, considering how honor would become such a person--that it was no better than picture-like to hang by th' wall, if renown made it not stir--was pleased to let him seek danger where he was like to find fame. To a cruel war I sent him, from whence he returned, his brows bound with oak. I tell thee, daughter, I sprang not more in joy at first hearing he was a man-child than now in first seeing he had proved himself a man.
+VOLUMNIA  I pray you, daughter, sing, or express yourself in a more comfortable sort. If my son were my husband, I should freelier rejoice in that absence wherein he won honor than in the embracements of his bed where he would show most love. When yet he was but tender-bodied and the only son of my womb, when youth with comeliness plucked all gaze his way, when for a day of kings' entreaties a mother should not sell him an hour from her beholding, I, considering how honor would become such a person--that it was no better than picture-like to hang by th' wall, if renown made it not stir--was pleased to let him seek danger where he was like to find fame. To a cruel war I sent him, from whence he returned, his brows bound with oak. I tell thee, daughter, I sprang not more in joy at first hearing he was a man-child than now in first seeing he had proved himself a man.
 
 VIRGILIA  But had he died in the business, madam, how then?
 
@@ -575,8 +572,7 @@ VIRGILIA  I thank your Ladyship; well, good madam.
 
 VOLUMNIA  He had rather see the swords and hear a drum than look upon his schoolmaster.
 
-VALERIA  O' my word, the father's son! I'll swear 'tis a very pretty boy. O' my troth, I looked upon him o'
-Wednesday half an hour together. H'as such a confirmed countenance. I saw him run after a gilded butterfly, and when he caught it, he let it go again, and after it again, and over and over he comes, and up again, catched it again. Or whether his fall enraged him or how 'twas, he did so set his teeth and tear it. O, I warrant how he mammocked it!
+VALERIA  O' my word, the father's son! I'll swear 'tis a very pretty boy. O' my troth, I looked upon him o' Wednesday half an hour together. H'as such a confirmed countenance. I saw him run after a gilded butterfly, and when he caught it, he let it go again, and after it again, and over and over he comes, and up again, catched it again. Or whether his fall enraged him or how 'twas, he did so set his teeth and tear it. O, I warrant how he mammocked it!
 
 VOLUMNIA  One on 's father's moods.
 
@@ -753,8 +749,7 @@ To answer all the city.
 
 LARTIUS  O, noble fellow,
 Who sensibly outdares his senseless sword,
-And when it bows, stand'st up! Thou art left,
-Martius.
+And when it bows, stand'st up! Thou art left, Martius.
 A carbuncle entire, as big as thou art,
 Were not so rich a jewel. Thou wast a soldier
 Even to Cato's wish, not fierce and terrible
@@ -923,8 +918,7 @@ MARTIUS
 How lies their battle? Know you on which side
 They have placed their men of trust?
 
-COMINIUS  As I guess,
-Martius,
+COMINIUS  As I guess, Martius,
 Their bands i' th' vaward are the Antiates,
 Of their best trust; o'er them Aufidius,
 Their very heart of hope.
