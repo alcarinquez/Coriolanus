@@ -253,11 +253,14 @@ def main_loop(console):
                 play_title = f.readline().strip()
         except Exception:
             play_title = os.path.basename(pf)
-        console.print(f"  [yellow]{idx}[/yellow]: {play_title} ([dim]{os.path.basename(pf)}[/dim])")
+        console.print(f"  [yellow]{idx}[/yellow]: {play_title}")
     console.print()
     selected = None
     while selected is None:
-        sel = Prompt.ask("Enter play number to select", default="1")
+        sel = Prompt.ask("Enter play number to select (or 'q' to quit)", default="1")
+        if sel.strip().lower() in ['quit', 'exit', 'q']:
+            console.print("\n[dim]Goodbye![/dim]\n")
+            return
         try:
             sel_idx = int(sel)
             if 1 <= sel_idx <= len(play_files):
