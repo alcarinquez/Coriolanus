@@ -1,13 +1,21 @@
 import re
+import os
 from pathlib import Path
 from typing import Dict, Tuple, Optional, List
+
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.text import Text
+from rich.layout import Layout
+
 from prompt_toolkit import prompt
+from prompt_toolkit.formatted_text import FormattedText
+from prompt_toolkit.shortcuts import choice
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.styles import Style
+
 
 class ShakespeareReader:
     def __init__(self, filepath: str):
@@ -120,19 +128,31 @@ class ShakespeareReader:
         # Create a nice header
         title = f"[bold cyan]{self.play_name} - Act {act}, Scene {scene}[/bold cyan]"
 
-        # Display in a panel
-        self.console.print()
-        self.console.print(
-            Panel(
-                formatted_text,
-                title=title,
-                border_style="cyan",
-                padding=(1, 2),
-                width=80,
-                expand=False
-            )
-        )
-        self.console.print()
+        # Configure pager to support colors
+        original_pager = os.environ.get('PAGER', '')
+        os.environ['PAGER'] = 'less -R'
+
+        try:
+            # Display in a pager with color support
+            with self.console.pager(styles=True):
+                self.console.print()
+                self.console.print(
+                    Panel(
+                        formatted_text,
+                        title=title,
+                        border_style="cyan",
+                        padding=(1, 2),
+                        width=80,
+                        expand=False
+                    )
+                )
+                self.console.print()
+        finally:
+            # Restore original pager setting
+            if original_pager:
+                os.environ['PAGER'] = original_pager
+            else:
+                os.environ.pop('PAGER', None)
 
     def parse_dialogues(self, scene_text: str) -> List[str]:
         """Parse a scene into individual dialogues/speeches."""
@@ -235,25 +255,64 @@ class ShakespeareReader:
         self.console.print()
 
 
-def main():
-    console = Console()
-    main_loop(console)
+def clear_screen(console):
+    """Clear the terminal screen and scrollback buffer."""
+    import sys
+
+    # Rich handles cross-platform clearing
+    console.clear()
+
+    # Bonus: try to clear scrollback (best effort)
+    try:
+        sys.stdout.write('\033[3J')
+        sys.stdout.flush()
+    except:
+        pass  # Silently ignore if not supported
 
 
-def main_loop(console):
-    # Print welcome banner
-    console.print()
-    console.print(Panel.fit(
-        "[bold cyan]Welcome to Coriolanus, the first terminal app dedicated to the complete works of William Shakespeare[/bold cyan]",
-        border_style="cyan"
-    ))
-    console.print()
+def corio_repl(console):
+    # Clear terminal scrollback
+    clear_screen(console)
+
+    # Rich layout for homepage
+    home_layout = Layout()
+    home_layout.split_column(
+        Layout(name="upper",size=5),
+        Layout(name="lower", size=10)
+    )
+    home_layout["upper"].split_row(
+        Layout(name="left", size=18),
+        Layout(name="center", size=5),
+        Layout(name="right", size=48)
+    )
+    home_layout["lower"].update(
+        "Input the [bold]first letter[/bold] of any play title! (e.g. [indian_red]H/h[/indian_red] for [italic]Hamlet[/italic])\n"
+        "Then press [sky_blue2]↑/↓[/sky_blue2] and [sky_blue2]↵ ENTER[/sky_blue2] to choose from the dropdown menu.\n\n\n"
+        "Or enter one of the commands below:\n"
+        "   [sky_blue2]list[/sky_blue2] to select from the entire catalogue of Shakespeare's works\n"
+        "   [sky_blue2]rand[/sky_blue2] to read a random play\n\n\n"
+        "To exit the app, enter [indian_red]q[/indian_red] or [sky_blue2]quit[/sky_blue2]."
+    )
+    home_layout["left"].update(
+        "[bold][sky_blue2]Welcome to[/sky_blue2]\n[gold3]CORIOLANUS[/bold] v0.1.0[/gold3]\n"
+        "[gold3]>>>[/gold3]"
+    )
+    home_layout["center"].update(
+        "[gold3]  │  \n  │  \n  │  [/gold3]"
+    )
+    home_layout["right"].update(
+        "[italic gold3]\"I had rather have one scratch my head i'th' sun\n"
+        " When the alarum were struck than idly sit\n"
+        " To hear my nothings monster'd.\"[/italic gold3]"
+    )
+    console.print(Panel(home_layout, border_style="gold3", width=79, height=19, padding=(1,3)))
+    
 
     # List available plays
     from glob import glob
     import os
     # Get the data directory relative to this module
-    data_dir = Path(__file__).parent / "data" / "folger-txt-mod"
+    data_dir = Path(__file__).parent / "data" / "plays"
     play_files = sorted(glob(str(data_dir / "*.txt")))
     if not play_files:
         console.print(f"[bold red]No plays found in {data_dir}![/bold red]")
@@ -280,8 +339,11 @@ def main_loop(console):
 
     # Create custom style with transparent background and no scrollbar
     custom_style = Style.from_dict({
-        'completion-menu': 'bg:',
-        'completion-menu.completion': '',
+        '': 'fg: ansiwhite',
+        'prompt-symbol': 'fg:#d7af00',
+        'completion-menu': 'fg: ansiblack',
+        'completion-menu.completion': 'fg: ansigray bg:',
+        'completion-menu.completion.current': 'fg:#d7af00 bg:',
         'scrollbar.background': 'bg:',
         'scrollbar.button': 'bg:',
     })
@@ -290,15 +352,44 @@ def main_loop(console):
     while selected is None:
         try:
             sel = prompt(
-                "> ",
+                FormattedText([('class:prompt-symbol', '___\n>>> ')]),
                 completer=play_completer,
                 style=custom_style,
-                complete_style='readline-like',
                 complete_while_typing=True
             ).strip()
+            console.print()  # Print newline after input
             if sel.lower() in ['quit', 'exit', 'q']:
                 console.print("\n[dim]Goodbye![/dim]\n")
                 return
+
+            # Handle list command - show full catalogue
+            if sel.lower() == 'list':
+                # Create style for choice menu
+                choice_style = Style.from_dict({
+                    'selected-option': 'fg:#d7af00',  # Hovered/selected item
+                    'number': 'fg: #87afff',           # Option numbers
+                    'input-selection': '',            # Input selection area
+                })
+
+                # Add "0. Cancel" option at the beginning
+                choice_options = [(None, "[Cancel selection]")] + [(name, name) for name in sorted(play_map.keys())]
+
+                play_choice = choice(
+                    message="Select a play from the complete catalogue:",
+                    options=choice_options,
+                    style=choice_style
+                )
+                if play_choice:  # If not None (not cancelled)
+                    selected = play_map[play_choice]
+                continue
+
+            # Handle rand command - select random play
+            if sel.lower() == 'rand':
+                import random
+                random_play = random.choice(list(play_map.keys()))
+                console.print(f"[dim]Randomly selected:[/dim] [cyan]{random_play}[/cyan]")
+                selected = play_map[random_play]
+                continue
 
             # Match play name (case-insensitive)
             matched_play = None
@@ -310,22 +401,28 @@ def main_loop(console):
             if matched_play:
                 selected = matched_play
             elif sel:
-                console.print("[red]Play not found. Please select from the autocomplete suggestions.[/red]")
+                console.print(" [indian_red]Play/Command not found. Please refer to usage above.[/indian_red]")
         except (KeyboardInterrupt, EOFError):
             console.print("\n[dim]Goodbye![/dim]\n")
             return
-    # Print welcome banner
-    console.print(Panel.fit(
-        f"[bold cyan]{ShakespeareReader(selected)._get_play_name()}[/bold cyan]\n"
-        "[dim]Interactive Scene Reader[/dim]\n\n"
-        "Enter [yellow]x.y[/yellow] to read Act x, Scene y\n"
-        "Enter [yellow]list[/yellow] to see available scenes\n"
-        "Enter [yellow]mode[/yellow] to toggle dialogue-by-dialogue mode\n"
-        "Enter [yellow]quit[/yellow] or [yellow]exit[/yellow] to quit",
-        border_style="cyan"
-    ))
-    console.print()
 
+    # Clear the screen and scrollback buffer
+    clear_screen(console)
+
+    # Print welcome banner for selected play
+    console.print(Panel.fit(
+        f"[bold gold3]{ShakespeareReader(selected)._get_play_name()}[/bold gold3]\n"
+        "[italic dim gold3]by William Shakespeare[/italic dim gold3]\n\n"
+        "Enter [sky_blue2]x.y[/sky_blue2] to read Act x, Scene y (e.g., [indian_red]1.1[/indian_red] for Act 1, Scene 1)\n"
+        "Enter [sky_blue2]list[/sky_blue2] to see available scenes\n"
+        "Enter [sky_blue2]mode[/sky_blue2] to toggle dialogue-by-dialogue mode\n"
+        "Enter [sky_blue2]home[/sky_blue2] to return to play selection\n"
+        "Enter [indian_red]quit[/indian_red] to exit",
+        border_style="gold3",
+        title="[italic gold3]Now reading[/italic gold3]",
+        title_align="right"
+    ))
+    
     # Initialize reader
     text_file = selected
     try:
@@ -335,19 +432,26 @@ def main_loop(console):
         console.print("Make sure you're running this from the project root directory.")
         return
 
-    # Mode tracking
-    dialogue_mode = False
+    # Mode tracking: "normal", "pager", or "dialogue"
+    reading_mode = "pager"  # Default mode
 
     # REPL loop
     while True:
         try:
             # Show current mode in prompt
-            mode_indicator = "[yellow](dialogue mode)[/yellow] " if dialogue_mode else ""
-            user_input = Prompt.ask(
-                f"[bold green]{mode_indicator}Enter Act.Scene[/bold green]",
-                default=""
+            mode_indicator = f"({reading_mode}) " if reading_mode != "pager" else ""
+            user_input = prompt(
+                FormattedText([
+                    ('class:separator', '___\n'),
+                    ('class:prompt-symbol', f'>>> {mode_indicator} ')
+                ]),
+                style=Style.from_dict({
+                    'separator': 'fg:#d7af00',
+                    'prompt-symbol': 'fg:#d7af00',
+                })
             ).strip().lower()
-
+            console.print()
+            
             if user_input in ['quit', 'exit', 'q']:
                 console.print("\n[dim]Goodbye![/dim]\n")
                 return
@@ -360,10 +464,36 @@ def main_loop(console):
                 continue
 
             if user_input == 'mode':
-                dialogue_mode = not dialogue_mode
-                mode_status = "enabled" if dialogue_mode else "disabled"
-                console.print(f"[bold cyan]Dialogue-by-dialogue mode {mode_status}[/bold cyan]")
+                # Create style for mode selection
+                mode_choice_style = Style.from_dict({
+                    'selected-option': 'fg:#d7af00',
+                    'number': 'fg:#87afff',
+                    'input-selection': '',
+                })
+
+                # Mode selection menu
+                mode_options = [
+                    ("normal", "Normal - Display scene all at once"),
+                    ("pager", "Pager - Scrollable view (default)"),
+                    ("dialogue", "Dialogue - Navigate line by line")
+                ]
+
+                selected_mode = choice(
+                    message="Select reading mode:",
+                    options=mode_options,
+                    style=mode_choice_style,
+                    default=reading_mode
+                )
+
+                if selected_mode:
+                    reading_mode = selected_mode
+                    console.print(f"\n [gold3]Mode set to: {reading_mode}[/gold3]")
                 continue
+
+            if user_input == 'home':
+                clear_screen(console)
+                corio_repl(console)  # Recursively call to return to play selection
+                return  # Exit current play session
 
             # Parse x.y format
             match = re.match(r'^(\d+)\.(\d+)$', user_input)
@@ -377,10 +507,38 @@ def main_loop(console):
             scene = int(match.group(2))
 
             # Display based on mode
-            if dialogue_mode:
+            if reading_mode == "dialogue":
                 reader.display_scene_dialogue_mode(act, scene)
-            else:
+            elif reading_mode == "pager":
                 reader.display_scene(act, scene)
+            else:  # normal mode
+                # Display without pager - just print directly
+                scene_text = reader.get_scene(act, scene)
+                if scene_text is None:
+                    console.print(
+                        Panel(
+                            f"[bold red]Act {act}, Scene {scene} not found![/bold red]\n\n"
+                            f"Available acts: 1-5\n"
+                            f"Please check your input.",
+                            title="Error",
+                            border_style="red"
+                        )
+                    )
+                else:
+                    formatted_text = reader.format_scene_text(scene_text.strip())
+                    title = f"[bold cyan]{reader.play_name} - Act {act}, Scene {scene}[/bold cyan]"
+                    console.print()
+                    console.print(
+                        Panel(
+                            formatted_text,
+                            title=title,
+                            border_style="cyan",
+                            padding=(1, 2),
+                            width=80,
+                            expand=False
+                        )
+                    )
+                    console.print()
 
         except KeyboardInterrupt:
             console.print("\n\n[dim]Goodbye![/dim]\n")
@@ -389,5 +547,10 @@ def main_loop(console):
             console.print(f"[bold red]Error:[/bold red] {e}")
 
 
+def main():
+    console = Console()
+    corio_repl(console)
+    
+    
 if __name__ == "__main__":
     main()
