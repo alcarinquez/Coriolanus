@@ -5,6 +5,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.text import Text
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.styles import Style
 
 class ShakespeareReader:
     def __init__(self, filepath: str):
@@ -18,6 +21,9 @@ class ShakespeareReader:
         try:
             with open(self.filepath, 'r', encoding='utf-8') as f:
                 first_line = f.readline().strip()
+                # Remove " by William Shakespeare" suffix if present
+                if first_line.endswith(" by William Shakespeare"):
+                    first_line = first_line[:-len(" by William Shakespeare")]
                 return first_line if first_line else "Unknown Play"
         except Exception:
             return "Unknown Play"
@@ -237,6 +243,12 @@ def main():
 def main_loop(console):
     # Print welcome banner
     console.print()
+    console.print(Panel.fit(
+        "[bold cyan]Welcome to Coriolanus, the first terminal app dedicated to the complete works of William Shakespeare[/bold cyan]",
+        border_style="cyan"
+    ))
+    console.print()
+
     # List available plays
     from glob import glob
     import os
@@ -246,29 +258,62 @@ def main_loop(console):
     if not play_files:
         console.print(f"[bold red]No plays found in {data_dir}![/bold red]")
         return
-    console.print("[bold cyan]Available Plays:[/bold cyan]")
-    for idx, pf in enumerate(play_files, 1):
+
+    # Build a mapping of play names to file paths
+    play_map = {}
+    for pf in play_files:
         try:
             with open(pf, 'r', encoding='utf-8') as f:
                 play_title = f.readline().strip()
+                # Remove " by William Shakespeare" suffix if present
+                if play_title.endswith(" by William Shakespeare"):
+                    play_title = play_title[:-len(" by William Shakespeare")]
         except Exception:
             play_title = os.path.basename(pf)
-        console.print(f"  [yellow]{idx}[/yellow]: {play_title}")
-    console.print()
+        play_map[play_title] = pf
+
+    # Create autocompleter with play names (case-insensitive, match from beginning)
+    play_completer = WordCompleter(
+        list(play_map.keys()),
+        ignore_case=True
+    )
+
+    # Create custom style with transparent background and no scrollbar
+    custom_style = Style.from_dict({
+        'completion-menu': 'bg:',
+        'completion-menu.completion': '',
+        'scrollbar.background': 'bg:',
+        'scrollbar.button': 'bg:',
+    })
+
     selected = None
     while selected is None:
-        sel = Prompt.ask("Enter play number to select (or 'q' to quit)", default="1")
-        if sel.strip().lower() in ['quit', 'exit', 'q']:
+        try:
+            sel = prompt(
+                "> ",
+                completer=play_completer,
+                style=custom_style,
+                complete_style='readline-like',
+                complete_while_typing=True
+            ).strip()
+            if sel.lower() in ['quit', 'exit', 'q']:
+                console.print("\n[dim]Goodbye![/dim]\n")
+                return
+
+            # Match play name (case-insensitive)
+            matched_play = None
+            for play_name, play_path in play_map.items():
+                if play_name.lower() == sel.lower():
+                    matched_play = play_path
+                    break
+
+            if matched_play:
+                selected = matched_play
+            elif sel:
+                console.print("[red]Play not found. Please select from the autocomplete suggestions.[/red]")
+        except (KeyboardInterrupt, EOFError):
             console.print("\n[dim]Goodbye![/dim]\n")
             return
-        try:
-            sel_idx = int(sel)
-            if 1 <= sel_idx <= len(play_files):
-                selected = play_files[sel_idx-1]
-            else:
-                console.print("[red]Invalid selection.[/red]")
-        except Exception:
-            console.print("[red]Invalid input.[/red]")
     # Print welcome banner
     console.print(Panel.fit(
         f"[bold cyan]{ShakespeareReader(selected)._get_play_name()}[/bold cyan]\n"
