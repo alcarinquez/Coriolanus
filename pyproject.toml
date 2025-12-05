@@ -1,10 +1,10 @@
 [project]
 name = "coriolanus"
 version = "0.1.0"
-description = "Add your description here"
+description = "Shakespeare in the Terminal"
 readme = "README.md"
 authors = [
-    { name = "Maxwell Zhou", email = "maxwell.zhou.zc@foxmail.com" }
+    { name = "alcarinquez", email = "maxwell.zhou.zichen@gmail.com" }
 ]
 requires-python = ">=3.11"
 dependencies = [
