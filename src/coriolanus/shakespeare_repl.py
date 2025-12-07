@@ -275,10 +275,10 @@ def quit_coriolanus(console):
     clear_screen(console)
 
     console.print()
-    console.print(f"[gold3]│[/gold3] [italic dim gold3]\"...thus I turn my back[/italic dim gold3]")
-    console.print(f"[gold3]│[/gold3] [italic dim gold3] There is a world elsewhere.\"[/italic dim gold3]")
+    console.print(f"[gold3]│[/gold3] [dim gold3]\"...thus I turn my back[/dim gold3]")
+    console.print(f"[gold3]│[/gold3] [dim gold3] There is a world elsewhere.\"[/dim gold3]")
     console.print()
-    console.print(f"[sky_blue2]│[/sky_blue2] [italic dim sky_blue2] Exeunt Coriolanus.[/italic dim sky_blue2]")
+    console.print(f"[sky_blue2]│[/sky_blue2] [italic][dim][sky_blue2]Exeunt[/italic] CORIOLANUS[/dim][/sky_blue2]")
     console.print()
 
 def corio_repl(console):
