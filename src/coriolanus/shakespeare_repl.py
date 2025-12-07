@@ -339,9 +339,7 @@ def corio_repl(console):
 
     # Create custom style with transparent background and no scrollbar
     custom_style = Style.from_dict({
-        '': 'fg: ansiwhite',
         'prompt-symbol': 'fg:#d7af00',
-        'completion-menu': 'fg: ansiblack',
         'completion-menu.completion': 'fg: ansigray bg:',
         'completion-menu.completion.current': 'fg:#d7af00 bg:',
         'scrollbar.background': 'bg:',
