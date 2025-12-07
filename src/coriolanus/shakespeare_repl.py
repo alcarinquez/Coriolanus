@@ -270,6 +270,17 @@ def clear_screen(console):
         pass  # Silently ignore if not supported
 
 
+def quit_coriolanus(console):
+    """Display Coriolanus quit message and exit."""
+    clear_screen(console)
+
+    console.print()
+    console.print(f"[gold3]│[/gold3] [italic dim gold3]\"...thus I turn my back[/italic dim gold3]")
+    console.print(f"[gold3]│[/gold3] [italic dim gold3] There is a world elsewhere.\"[/italic dim gold3]")
+    console.print()
+    console.print(f"[sky_blue2]│[/sky_blue2] [italic dim sky_blue2] Exeunt Coriolanus.[/italic dim sky_blue2]")
+    console.print()
+
 def corio_repl(console):
     # Clear terminal scrollback
     clear_screen(console)
@@ -350,14 +361,14 @@ def corio_repl(console):
     while selected is None:
         try:
             sel = prompt(
-                FormattedText([('class:prompt-symbol', '___\n>>> ')]),
+                FormattedText([('class:prompt-symbol', '\u2500\u2500\u2500\n>>> ')]),
                 completer=play_completer,
                 style=custom_style,
                 complete_while_typing=True
             ).strip()
             console.print()  # Print newline after input
             if sel.lower() in ['quit', 'exit', 'q']:
-                console.print("\n[dim]Goodbye![/dim]\n")
+                quit_coriolanus(console)
                 return
 
             # Handle list command - show full catalogue
@@ -401,7 +412,7 @@ def corio_repl(console):
             elif sel:
                 console.print(" [indian_red]Play/Command not found. Please refer to usage above.[/indian_red]")
         except (KeyboardInterrupt, EOFError):
-            console.print("\n[dim]Goodbye![/dim]\n")
+            quit_coriolanus(console)
             return
 
     # Clear the screen and scrollback buffer
@@ -451,7 +462,7 @@ def corio_repl(console):
             console.print()
             
             if user_input in ['quit', 'exit', 'q']:
-                console.print("\n[dim]Goodbye![/dim]\n")
+                quit_coriolanus(console)
                 return
 
             if not user_input:
@@ -539,7 +550,7 @@ def corio_repl(console):
                     console.print()
 
         except KeyboardInterrupt:
-            console.print("\n\n[dim]Goodbye![/dim]\n")
+            quit_coriolanus(console)
             return
         except Exception as e:
             console.print(f"[bold red]Error:[/bold red] {e}")
